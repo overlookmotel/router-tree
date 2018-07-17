@@ -15,3 +15,4 @@
 ## Next
 
 * Rename `.getPath` Route method to `.initPath`
+* README section 'Overriding path construction'

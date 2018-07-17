@@ -510,6 +510,24 @@ module.exports = class extends Route {
 }
 ```
 
+### Overriding path construction
+
+The `path` for each route is constructed by the `.initPath()` method on each route object.
+
+It can be overriden in a `Route` subclass.
+
+```js
+const {Route} = require('routerTree');
+
+class MyRoute extends Route {
+  initPath() {
+    const path = super.initPath();
+    // Modify path in some way
+    return path;
+  }
+}
+```
+
 ### Companions
 
 To reduce boilerplate, you can define a set of several routes in one file. The additional routes are "companions" of the route they are defined in.
