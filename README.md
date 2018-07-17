@@ -382,6 +382,8 @@ A route's parent is:
 
 Default for `parentPath` if not defined is `'./'`, except for the root node which is `null`.
 
+As a shortcut, relative paths can be defined without a prepended `./` i.e. `'view'` is the same as `'./view'`. router-tree will add the `./` automatically.
+
 ### Associated files
 
 You can associate additional files with routes by using the `types` option.
@@ -551,7 +553,7 @@ class CrudRoute extends Route {
 }
 ```
 
-Creating a route in `/artists/index.js` with `new CrudRoute()` will create routes with the following paths:
+Creating a route file in `/artists/index.js` with `module.exports = new CrudRoute()` will create routes with the following paths:
 
 ```
 /artists
@@ -567,22 +569,25 @@ Companion routes are added before `.init()` is called, so must be added in the c
 
 Why call them "companions" rather than just "children"? Well, they may *not be* children. In the example above `/artists/view` is a child of `/artists` but `/artists/edit` and `/artists/delete` are not - their parent is `/artists/view`.
 
-Adding companions is like adding files in the same folder as the route file which defines them. They end up in the route tree the same as routes defined in their own files would.
+Adding companions is like adding a folder of route files next to the route file which defines them (or files in the *same* folder if the main route file is `index.js`). The companion routes end up in the route tree the same as routes defined in their own files would.
 
 Where they end up in the route tree depends on:
 
 1. attribute name they are defined with (relative path)
 2. `parentPath` defined in each
 
-i.e. `this.companions.view = ...` creates a route with relative path of `'view'`. The `internalPath` of the companion is the `internalPath` of the main route + the relative path.
+i.e. `this.companions.view = ...` creates a route with relative path of `'./view'`. The `internalPath` of the companion is the `internalPath` of the main route + the relative path.
 
-Unlike with `parentPath`, the relative path is relative to the route *file* not its containing folder.
+Same as with `parentPath`, the prepended `./` in relative paths can be left off - `'view'` is the same as `'./view'`.
 
-You can define companions with any relative path. e.g.:
+Unlike `parentPath`, the relative path is relative to the route *file*, not its containing folder.
+
+You can define companions with any relative or absolute path. e.g.:
 
 ```js
 this.companions['../view'] = ...
 this.companions['./folder/subfolder'] = ...
+this.companions['/absolute'] = ...
 ```
 
 #### Real files take precedence
