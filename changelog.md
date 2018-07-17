@@ -21,6 +21,6 @@
 
 * README update
 
-## Next
+## 1.0.5
 
 * `param` and `endSlash` properties Route properties initially undefined
