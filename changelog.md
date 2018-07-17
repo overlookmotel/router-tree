@@ -17,6 +17,6 @@
 * Rename `.getPath` Route method to `.initPath`
 * README section 'Overriding path construction'
 
-## Next
+## 1.0.4
 
 * README update
