@@ -303,7 +303,7 @@ User-definable:
 Methods:
 
 * `init()` - Called after parentage is deduced, but before `path` is built (default is no-op)
-* `getPath()` - Builds route `path`. By default, uses `pathPart`, `param` and `endSlash` (as shown above), but can be overriden
+* `initPath()` - Builds route `path`. By default, uses `pathPart`, `param` and `endSlash` (as shown above), but can be overriden
 
 ### Lifecycle
 
@@ -318,7 +318,7 @@ Loading occurs in the following order:
 7. Parentage of all nodes determined by reference to `parentPath` property
 8. Route tree built - all properties noted above are set
 9. `.init()` method called on each node, starting at root and working up the tree
-10. `.getPath()` method called on each node
+10. `.initPath()` method called on each node
 11. Tree returned
 
 Therefore:

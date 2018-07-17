@@ -11,3 +11,7 @@
 ## 1.0.2
 
 * README update
+
+## Next
+
+* Rename `.getPath` Route method to `.initPath`
