@@ -189,7 +189,7 @@ That's where router-tree hands over to you.
 
 It would be easy, for example, to traverse the tree and register a route with [Express](https://www.npmjs.com/package/express) for each node, using a property of the route file as the handler.
 
-In each route file create a method `getHandler()`. And:
+In each route file create a method `getHandler()` on the exported object. And:
 
 ```js
 const app = express();
@@ -198,14 +198,14 @@ const tree = routerTree.sync('/path/to/routes');
 
 routerTree.traverse(tree, node => {
   if (node.getHandler) app.get(node.path, node.getHandler);
-});
+} );
 ```
 
 (`routerTree.traverse()` is a helper method that comes with the library)
 
 But there's a lot more...
 
-### Other resources
+### Associated resources
 
 The route files that we've seen so far are purely to map the routing structure. What about client-side components?
 
@@ -216,7 +216,7 @@ If you want to provide a [React](https://reactjs.org/) component for each (or so
 ```js
 const tree = routerTree.sync('/path/to/routes', {
   types: { react: 'jsx' }
-});
+} );
 ```
 
 Now if you add a file `/index.jsx`, the resulting route tree looks like:
@@ -238,7 +238,7 @@ Every route file loaded is converted to an instance of `routerTree.Route` class.
 
 #### Using the `Route` class directly
 
-You can also define routes using this class directly:
+You can define routes using this class directly:
 
 ```js
 new Route( { /* props */ } )
@@ -276,7 +276,7 @@ If you want to add another route `/artists/:artistId/albums/:albumId`, just use 
 
 #### More
 
-You can also use route classes to achieve much more powerful effects if a lot of your routes are similar e.g. CRUD (see section on "Companions" below).
+You can also use Route classes to achieve much more powerful effects if a lot of your routes are similar e.g. CRUD (see section on "Companions" below).
 
 ### Anatomy of a Route
 
@@ -284,7 +284,6 @@ Each route object has the following properties:
 
 Defined by router-tree:
 
-* `path` - External path for the route e.g. `'/artists/:artistId'`
 * `name` - Name of the route (from the filename) e.g. `'view'`
 * `internalPath` - Internal path e.g. `'/artists/view'`
 * `sourcePath` - Path to the source file e.g. `'/artists/view.js'`
@@ -294,9 +293,10 @@ Defined by router-tree:
 
 User-definable:
 
+* `path` - External path for the route e.g. `'/artists/:artistId'` (if not defined, router-tree will build)
 * `parentPath` - Relative or absolute path to parent route e.g. `'/artists'`, `'./view'`, `'../'` (default `'./'`)
 * `pathPart` - Text to add to the `path` for this route e.g. `'display'` or `null` for nothing (defaults to `route.name`)
-* `param` - Name of parameter to add to the `path` e.g. `'artistId'` (default `null`)
+* `param` - Name of param to add to the `path` e.g. `'artistId'` (default `null`)
 * `endSlash` - If `true`, adds a final `/` to end of the path (default `false`)
 * `companions` - (see below)
 
@@ -311,14 +311,15 @@ Loading occurs in the following order:
 
 1. Directory scanned for files
 2. Route files loaded using Node's `require()`
-3. Route files exporting plain objects (or `null`) converted to instances of `Route` (class constructor called)
-4. Internal paths calculated from file paths
-5. Companions (see below) added to routes
-6. Parentage of all nodes determined by reference to `parentPath` property
-7. Route tree built - all properties noted above are set
-8. `.init()` method called on each node, starting at root and working up the tree
-9. `.getPath()` method called on each node
-10. Tree returned
+3. Internal paths calculated from file paths
+4. Companions (see below) added to routes
+5. Route files exporting plain objects (or `null`) converted to instances of `Route` (class constructor called)
+6. Associated files added to `files` object on routes
+7. Parentage of all nodes determined by reference to `parentPath` property
+8. Route tree built - all properties noted above are set
+9. `.init()` method called on each node, starting at root and working up the tree
+10. `.getPath()` method called on each node
+11. Tree returned
 
 Therefore:
 
@@ -348,11 +349,11 @@ const tree = routerTree.sync('/path/to/routes', {
 } );
 ```
 
-NB Files are also filtered by file extension according to the `type` option, regardless of `options.filterFiles` (see below).
+NB Files are also filtered by file extension according to the `types` option (see below), in addition to filtering by `options.filterFiles`.
 
 #### Filesystem concurrency
 
-Maximum number of concurrent filesystem operations can be set with `options.maxConcurrent`. Default is `5`.
+Maximum number of concurrent filesystem operations can be set with `maxConcurrent` option. Default is `5`.
 
 Does not apply to `routerTree.sync()`.
 
@@ -360,13 +361,15 @@ Does not apply to `routerTree.sync()`.
 
 Parentage (i.e. which route is a child of which) is resolved according to the `parentPath` attribute of each route. You can create the route tree in any shape you want by setting `parentPath` accordingly.
 
-Resolution is similar to Node's `require()`. i.e. relative to the *folder* that the file is in.
+Resolution of relative paths is similar to Node's `require()`. i.e. relative to the *folder* that the file is in.
+
+Absolute paths start with `/`. They are absolute relative to the root *of the directory routes are loaded from*, not filesystem root.
 
 Each route's `internalPath` is the file path minus the extension. Files named `index` are referenced by the path of the folder they are in.
 
 A route's parent is:
 
-> the route with an `internalPath` which equals the path you get by resolving the child's `parentPath` relative to its `internalPath`.
+> the route with an `internalPath` which equals the path you get by resolving the child's `parentPath` relative to its own `internalPath`.
 
 | Source path              | `internalPath`  | `parentPath` | Parent resolves to |
 |--------------------------|-----------------|--------------|--------------------|
@@ -375,8 +378,9 @@ A route's parent is:
 | /artists/view.js         | /artists/view   | ./           | /artists           |
 | /artists/edit.js         | /artists/edit   | ./view       | /artists/view      |
 | /artists/albums/index.js | /artists/albums | ./view       | /artists/view      |
+| /artists/new.js          | /artists/new    | /artists     | /artists           |
 
-Default for `parentPath` if not defined is `'./'`.
+Default for `parentPath` if not defined is `'./'`, except for the root node which is `null`.
 
 ### Associated files
 
@@ -431,7 +435,7 @@ Defining an `ignore` type tells router-tree to ignore files with this extension.
 
 #### Implicit routes
 
-You don't need to provide a route file to create a route. Just the presence of another file defined in `types` will implicitly create a route with default options.
+You don't need to provide a route file to create a route. Just the presence of an associated file defined in `types` will implicitly create a route with default options.
 
 e.g. Adding a file `/view.jsx` creates a route `/view` with the following properties:
 
@@ -450,7 +454,7 @@ e.g. Adding a file `/view.jsx` creates a route `/view` with the following proper
 
 #### Notes
 
-router-tree attempts to match with the longest extension first. Hence why `/index.cont.js` gets identified as a controller, not a route.
+router-tree attempts to match with the longest extension first. Hence why `/index.cont.js` gets identified as a controller (`.cont.js`), not a route (`.js`).
 
 Types can also be defined as an array of extensions e.g. `types: { react: [ 'jsx', 'react.js' ] }`.
 
@@ -460,7 +464,7 @@ Any route files that exports a plain object (or `null`, or indeed anything else 
 
 If a route is created implicitly by the presence of an associated file (due to `types` option), that route is also a new instance of `Route` class.
 
-`defaultRouteClass` option sets the default class to create the routes from. It **must** be a subclass of `Route` itself.
+`defaultRouteClass` option sets the default class to create routes from. It **must** be a subclass of `Route` itself.
 
 ```js
 const routerTree = require('routerTree');
@@ -508,7 +512,7 @@ module.exports = class extends Route {
 
 ### Companions
 
-To reduce boilerplate, you can define a set of routes in one route file. The additional routes are "companions" of the route they are defined in.
+To reduce boilerplate, you can define a set of several routes in one file. The additional routes are "companions" of the route they are defined in.
 
 For example, to create a `Route` subclass that provides routes for all the classic CRUD actions:
 
@@ -539,9 +543,11 @@ Creating a route in `/artists/index.js` with `new CrudRoute()` will create route
 /artists/new
 ```
 
+Companion routes are added before `.init()` is called, so must be added in the class constructor.
+
 #### Paths
 
-Why call them "companions" rather than just "children"? Well, they may not *be* children. In the example above `/artists/view` is a child of `/artists` but `/artists/edit` and `/artists/delete` are not - their parent is `/artists/view`.
+Why call them "companions" rather than just "children"? Well, they may *not be* children. In the example above `/artists/view` is a child of `/artists` but `/artists/edit` and `/artists/delete` are not - their parent is `/artists/view`.
 
 Adding companions is like adding files in the same folder as the route file which defines them. They end up in the route tree the same as routes defined in their own files would.
 
@@ -554,7 +560,12 @@ i.e. `this.companions.view = ...` creates a route with relative path of `'view'`
 
 Unlike with `parentPath`, the relative path is relative to the route *file* not its containing folder.
 
-You can defined companions with any relative path. e.g. `this.companions['../view'] = ...`
+You can define companions with any relative path. e.g.:
+
+```js
+this.companions['../view'] = ...
+this.companions['./folder/subfolder'] = ...
+```
 
 #### Real files take precedence
 
@@ -568,7 +579,7 @@ Any associated files found according to the `types` option will be attached to t
 
 #### `routerTree.traverse( tree, fn )`
 
-Helper method to traverse every node of `tree`, starting at the root node and working up the tree. `fn` is called with each node in turn.
+Helper method to traverse every node of `tree`, starting at the root node and working up the tree. `fn()` is called with each node in turn.
 
 e.g. to log all routes' paths:
 
@@ -584,7 +595,7 @@ Helper method to flatten route tree into an array of routes.
 const routes = routerTree.flatten( tree );
 ```
 
-Is implemented using `.traverse()`:
+It is implemented using `.traverse()`:
 
 ```js
 const routes = [];
