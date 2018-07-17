@@ -8,6 +8,6 @@
 
 * Allow `pathPart` in root node
 
-## Next
+## 1.0.2
 
 * README update
