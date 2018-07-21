@@ -24,3 +24,7 @@
 ## 1.0.5
 
 * `param` and `endSlash` properties Route properties initially undefined
+
+## Next
+
+* Fix: `utils.isSubclassOf` bug
