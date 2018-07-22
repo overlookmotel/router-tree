@@ -14,6 +14,7 @@
     "url": "https://github.com/overlookmotel/router-tree/issues"
   },
   "dependencies": {
+    "sort-route-paths": "^1.0.0"
   },
   "devDependencies": {
     "chai": "^4.1.2",

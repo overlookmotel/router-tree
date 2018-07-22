@@ -196,12 +196,12 @@ const app = express();
 
 const tree = routerTree.sync('/path/to/routes');
 
-routerTree.traverse(tree, node => {
+routerTree.flatten(tree).forEach(node => {
   if (node.getHandler) app.get(node.path, node.getHandler);
 } );
 ```
 
-(`routerTree.traverse()` is a helper method that comes with the library)
+(`routerTree.flatten()` is a helper method that comes with the library - see below)
 
 But there's a lot more...
 
@@ -614,15 +614,10 @@ routerTree.traverse( tree, node => console.log(node.path) );
 
 Helper method to flatten route tree into an array of routes.
 
+The routes are sorted by `path` (using [sort-route-paths](https://www.npmjs.com/package/sort-route-paths)).
+
 ```js
 const routes = routerTree.flatten( tree );
-```
-
-It is implemented using `.traverse()`:
-
-```js
-const routes = [];
-routerTree.traverse( tree, node => routes.push(node) );
 ```
 
 ## Tests

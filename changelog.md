@@ -28,3 +28,7 @@
 ## 1.0.6
 
 * Fix: `utils.isSubclassOf` bug
+
+## Next
+
+* `.flatten` method sorts routes by path
