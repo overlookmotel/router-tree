@@ -29,7 +29,7 @@
 
 * Fix: `utils.isSubclassOf` bug
 
-## Next
+## 1.1.0
 
 * `.flatten` method sorts routes by path
 * package.json keywords
