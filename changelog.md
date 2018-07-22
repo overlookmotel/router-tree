@@ -32,3 +32,4 @@
 ## Next
 
 * `.flatten` method sorts routes by path
+* package.json keywords
