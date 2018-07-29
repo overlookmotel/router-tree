@@ -302,6 +302,7 @@ User-definable:
 
 Methods:
 
+* `initProps()` - Called within class constructor, before properties supplied to constructor are applied to Route instance
 * `init()` - Called after parentage is deduced, but before `path` is built (default is no-op)
 * `initPath()` - Builds route `path`. By default, uses `pathPart`, `param` and `endSlash` (as shown above), but can be overriden
 
@@ -313,18 +314,19 @@ Loading occurs in the following order:
 2. Route files loaded using Node's `require()`
 3. Internal paths calculated from file paths
 4. Companions (see below) added to routes
-5. Route files exporting plain objects (or `null`) converted to instances of `Route` (class constructor called)
-6. Associated files added to `files` object on routes
-7. Parentage of all nodes determined by reference to `parentPath` property
-8. Route tree built - all properties noted above are set
-9. `.init()` method called on each node, starting at root and working up the tree
-10. `.initPath()` method called on each node
-11. Tree returned
+5. Route files exporting plain objects (or `null`) converted to instances of `Route`
+6. `.initProps()` method called on each node
+7. Associated files added to `files` object on routes
+8. Parentage of all nodes determined by reference to `parentPath` property
+9. Route tree built - all properties noted above are set
+10. `.init()` method called on each node, starting at root and working up the tree
+11. `.initPath()` method called on each node
+12. Tree returned
 
 Therefore:
 
-* Properties which affect parentage must be set as initial properties or in a `Route` subclass constructor.
-* Properties which affect the `path` must be set in `init()` method at latest.
+* Properties which affect parentage must be set as initial properties or in a `Route` subclass constructor or `.initProps()` method.
+* Properties which affect the `path` must be set in `.init()` method at latest.
 
 ### Loading options
 

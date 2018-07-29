@@ -33,3 +33,7 @@
 
 * `.flatten` method sorts routes by path
 * package.json keywords
+
+## Next
+
+* `.initProps` Route method
