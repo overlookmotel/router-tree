@@ -313,9 +313,9 @@ Loading occurs in the following order:
 1. Directory scanned for files
 2. Route files loaded using Node's `require()`
 3. Internal paths calculated from file paths
-4. Companions (see below) added to routes
-5. Route files exporting plain objects (or `null`) converted to instances of `Route`
-6. `.initProps()` method called on each node
+4. Route files exporting plain objects (or `null`) converted to instances of `Route`
+5. `.initProps()` method called on each node
+6. Companions (see below) added to routes
 7. Associated files added to `files` object on routes
 8. Parentage of all nodes determined by reference to `parentPath` property
 9. Route tree built - all properties noted above are set

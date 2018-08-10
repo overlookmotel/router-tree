@@ -37,3 +37,7 @@
 ## 1.2.0
 
 * `.initProps` Route method
+
+## Next
+
+* README update
