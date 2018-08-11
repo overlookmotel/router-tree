@@ -505,13 +505,15 @@ const tree = await routerTree('/path/to/routes', {
 // '/artists' route definition
 const {Route} = require('routerTree');
 
-module.exports = class extends Route {
+class MyRoute extends Route {
   init(context) {
     super.init(context);
     console.log(context.msg); // Logs 'Hello!'
     this.model = context.models.Artist;
   }
 }
+
+module.exports = new MyRoute();
 ```
 
 ### Overriding path construction
