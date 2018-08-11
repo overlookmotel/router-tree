@@ -29,6 +29,7 @@ function loadWithSpy(options) {
 	const calls = [];
 	class SpyRoute extends Route {
 		init(context) {
+			super.init(context);
 			calls.push({path: this.internalPath, context});
 		}
 	}
