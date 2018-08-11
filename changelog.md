@@ -54,6 +54,6 @@
 
 * README update
 
-## Next
+## 1.4.3
 
 * Update `promise-methods` dependency
