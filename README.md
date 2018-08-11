@@ -29,7 +29,6 @@ This module will load route files from a directory structure according to config
 
 ```js
 const routerTree = require('router-tree');
-
 const tree = await routerTree('/path/to/routes', {/* options */});
 ```
 
@@ -195,15 +194,14 @@ In each route file create a method `getHandler()` on the exported object. And:
 
 ```js
 const app = express();
+const tree = await routerTree('/path/to/routes');
 
-const tree = routerTree.sync('/path/to/routes');
-
-routerTree.flatten(tree).forEach(node => {
-  if (node.getHandler) app.get(node.path, node.getHandler);
+routerTree.traverse(tree, route => {
+  if (route.getHandler) app.get(route.path, route.getHandler);
 } );
 ```
 
-(`routerTree.flatten()` is a helper method that comes with the library - see below)
+(`routerTree.traverse()` is a helper method that comes with the library - see below)
 
 But there's a lot more...
 
@@ -216,7 +214,7 @@ You can associate any other files you like with each route.
 If you want to provide a [React](https://reactjs.org/) component for each (or some of) the routes, use the `types` option:
 
 ```js
-const tree = routerTree.sync('/path/to/routes', {
+const tree = await routerTree('/path/to/routes', {
   types: { react: 'jsx' }
 } );
 ```
@@ -243,7 +241,7 @@ Every route file loaded is converted to an instance of `routerTree.Route` class.
 You can define routes using this class directly:
 
 ```js
-new Route( { /* props */ } )
+new Route( {/* props */} )
 new Route( { parentPath: '../' } )
 ```
 
@@ -323,7 +321,8 @@ Loading occurs in the following order:
 9. Route tree built - all properties noted above are set
 10. `.init()` method called on each node, starting at root and working up the tree
 11. `.initPath()` method called on each node
-12. Tree returned
+12. Children sorted by path (static paths before dynamic paths)
+13. Tree returned
 
 Therefore:
 
@@ -345,7 +344,7 @@ Each option can be either:
 2. `Function` - which receives filename and returns `true` to include them
 
 ```js
-const tree = routerTree.sync('/path/to/routes', {
+const tree = await routerTree('/path/to/routes', {
   // Skip test files
   filterFiles: filename => filename.slice(-8) == '.test.js',
   // Skip folders starting with '_'
@@ -395,7 +394,7 @@ You can associate additional files with routes by using the `types` option.
 Files are identified by file extension.
 
 ```js
-const tree = routerTree.sync('/path/to/routes', {
+const tree = await routerTree('/path/to/routes', {
   types: {
     route: 'js',
     react: 'jsx',
@@ -462,11 +461,11 @@ e.g. Adding a file `/view.jsx` creates a route `/view` with the following proper
 
 router-tree attempts to match with the longest extension first. Hence why `/index.cont.js` gets identified as a controller (`.cont.js`), not a route (`.js`).
 
-Types can also be defined as an array of extensions e.g. `types: { react: [ 'jsx', 'react.js' ] }`.
+Types can also be defined as an array of extensions e.g. `types: { view: [ 'html', 'ejs' ] }`.
 
 ### Class options
 
-Any route files that exports a plain object (or `null`, or indeed anything else which isn't an instance of `routerTree.Route` class) is converted to an instance of `Route`.
+Any route files that export a plain object (or `null`, or indeed anything else which isn't an instance of `routerTree.Route` class) is converted to an instance of `Route`.
 
 If a route is created implicitly by the presence of an associated file (due to `types` option), that route is also a new instance of `Route` class.
 
@@ -477,12 +476,11 @@ const routerTree = require('routerTree');
 
 class MyRouteClass extends routerTree.Route { ... }
 
-const tree = routerTree.sync('/path/to/routes', {
+const tree = await routerTree('/path/to/routes', {
   defaultRouteClass: MyRouteClass
 } );
 
 assert( tree instanceof MyRouteClass );
-
 ```
 
 ### Context injection
@@ -495,7 +493,7 @@ The `context` object provided is passed to the `.init()` method of each route.
 
 ```js
 // Route loader
-const tree = routerTree.sync('/path/to/routes', {
+const tree = await routerTree('/path/to/routes', {
   context: {
     msg: 'Hello!',
     models: databaseModels
@@ -567,7 +565,7 @@ Creating a route file in `/artists/index.js` with `module.exports = new CrudRout
 /artists/new
 ```
 
-Companion routes are added before `.init()` is called, so must be added in the class constructor.
+Companion routes are added before `.init()` is called, so must be added in the class constructor or in `.initProps()`.
 
 #### Paths
 
@@ -611,7 +609,7 @@ Helper method to traverse every node of `tree`, starting at the root node and wo
 e.g. to log all routes' paths:
 
 ```js
-routerTree.traverse( tree, node => console.log(node.path) );
+routerTree.traverse( tree, route => console.log(route.path) );
 ```
 
 #### `routerTree.traverseAsync( tree, fn [, options] )`
@@ -627,7 +625,7 @@ e.g.:
 ```js
 await routerTree.traverseAsync(
   tree,
-  async function(node) { /* do something async */ },
+  async function(route) {/* do something async */},
   { concurrency: 5 }
 );
 ```
@@ -635,8 +633,6 @@ await routerTree.traverseAsync(
 #### `routerTree.flatten( tree )`
 
 Helper method to flatten route tree into an array of routes.
-
-The routes are sorted by `path` (using [sort-route-paths](https://www.npmjs.com/package/sort-route-paths)).
 
 ```js
 const routes = routerTree.flatten( tree );

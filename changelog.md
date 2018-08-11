@@ -45,3 +45,7 @@
 ## 1.4.0
 
 * Order children by path
+
+## Next
+
+* README update
