@@ -612,6 +612,24 @@ e.g. to log all routes' paths:
 routerTree.traverse( tree, node => console.log(node.path) );
 ```
 
+#### `routerTree.traverseAsync( tree, fn [, options] )`
+
+Helper method to traverse every node of `tree` asynchronously, starting at the root node and working up the tree. `fn()` is called with each node in turn.
+
+If `fn` returns a promise, the promise is awaited before calling `fn` on the route's children.
+
+Concurrency (i.e. max number of routes `fn` is being run on simultaneously) can be set with `options.concurrency`. Default is no concurrency limit.
+
+e.g.:
+
+```js
+await routerTree.traverseAsync(
+  tree,
+  async function(node) { /* do something async */ },
+  { concurrency: 5 }
+);
+```
+
 #### `routerTree.flatten( tree )`
 
 Helper method to flatten route tree into an array of routes.
