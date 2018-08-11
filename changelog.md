@@ -50,6 +50,6 @@
 
 * README update
 
-## Next
+## 1.4.2
 
 * README update
