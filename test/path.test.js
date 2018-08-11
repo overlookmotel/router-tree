@@ -32,6 +32,7 @@ describe('Path', function() {
 		this.root = root;
 
 		const routes = flatten(root);
+		this.routes = routes;
 		this.getRoute = makeGetRoute(routes);
 	});
 
@@ -215,4 +216,76 @@ describe('Path', function() {
 			});
 		});
 	});
+
+	describe('children ordered', function() {
+		beforeEach(function() {
+			const {children} = this.getRoute('/order');
+			this.paths = Object.keys(children).map(name => children[name].path);
+		});
+
+		it('static paths first', function() {
+			const {paths} = this;
+			['/order/edit', '/order/folder', '/order/z'].forEach(path => {
+				expectBefore(paths, path, '/order/:id');
+				expectBefore(paths, path, '/order/*');
+			});
+		});
+
+		it(':param before *', function() {
+			const {paths} = this;
+			expectBefore(paths, '/order/:id', '/order/*');
+		});
+
+		it('by name', function() {
+			const {paths} = this;
+			expectBefore(paths, '/order/edit', '/order/folder');
+			expectBefore(paths, '/order/folder', '/order/z');
+		});
+	});
+
+	describe('flattened routes ordered', function() {
+		beforeEach(function() {
+			this.paths = this.routes.map(route => route.path)
+				.filter(path => path.match(/^\/order/));
+		});
+
+		it('parent first', function() {
+			const {paths} = this;
+
+			expect(paths).to.have.length(8);
+			expect(paths[0]).to.equal('/order');
+		});
+
+		it('static paths first', function() {
+			const {paths} = this;
+			['/order/edit', '/order/folder', '/order/z'].forEach(path => {
+				expectBefore(paths, path, '/order/:id');
+				expectBefore(paths, path, '/order/*');
+			});
+			expectBefore(paths, '/order/folder/edit', '/order/folder/:id');
+		});
+
+		it(':param before *', function() {
+			const {paths} = this;
+			expectBefore(paths, '/order/:id', '/order/*');
+		});
+
+		it('by name', function() {
+			const {paths} = this;
+			expectBefore(paths, '/order/edit', '/order/folder');
+			expectBefore(paths, '/order/folder', '/order/z');
+		});
+
+		it('children before next route', function() {
+			const {paths} = this;
+			expectBefore(paths, '/order/folder/edit', '/order/z');
+			expectBefore(paths, '/order/folder/:id', '/order/z');
+		});
+	});
 });
+
+function expectBefore(arr, v1, v2) {
+	expect(arr).to.include(v1);
+	expect(arr).to.include(v2);
+	if (arr.indexOf(v1) >= arr.indexOf(v2)) throw new Error(`Expected '${v1}' to be before '${v2}'`);
+}

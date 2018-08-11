@@ -114,6 +114,8 @@ To turn this into a tree, each route's parent is identified, and router-tree ret
 
 Each node also has a `parent` property, pointing back to that node's parent. For the root node `/`, it is `null`.
 
+Children are ordered with static paths first (i.e. `/artists/albums` before `/artists/:artistId`) - the order you would match the routes in.
+
 #### Setting parentage
 
 In the example above, `/artists/albums` is in the wrong place. It should be a child of `/artists/view` not `/artists`.
