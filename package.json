@@ -14,7 +14,7 @@
     "url": "https://github.com/overlookmotel/router-tree/issues"
   },
   "dependencies": {
-    "promise-methods": "^1.1.0",
+    "promise-methods": "^1.1.1",
     "sort-route-paths": "^1.0.0"
   },
   "devDependencies": {
